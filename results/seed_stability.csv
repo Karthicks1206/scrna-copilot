@@ -1,0 +1,6 @@
+seed,n_clusters,ari_cell_type_vs_first,ari_clusters_vs_first,n_B cells,n_CD14+ monocytes,n_CD4+ T cells,n_CD8+ T cells,n_Dendritic cells,n_FCGR3A+ monocytes,n_NK cells,n_Platelets
+0,9,1.0,1.0,341,413,1155,299,37,223,155,15
+1,9,0.991,0.912,341,413,1155,299,37,223,155,15
+2,9,0.973,0.827,341,410,1165,305,41,222,139,15
+3,9,0.98,0.82,341,410,1166,302,41,222,141,15
+4,9,0.989,0.908,341,416,1158,296,37,220,155,15

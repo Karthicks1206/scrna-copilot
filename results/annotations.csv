@@ -1,0 +1,10 @@
+cluster,label,score,n_cells
+0,CD4+ T cells,58.5,508
+1,B cells,84.3,341
+2,CD4+ T cells,65.9,647
+3,FCGR3A+ monocytes,75.4,223
+4,NK cells,70.2,155
+5,CD8+ T cells,71.2,299
+6,CD14+ monocytes,85.1,413
+7,Dendritic cells,67.6,37
+8,Platelets,96.7,15
