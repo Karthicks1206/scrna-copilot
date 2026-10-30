@@ -27,7 +27,25 @@ def test_tools_refuse_to_run_out_of_order():
         srv.quality_control()
 
 
-def test_tool_chain_end_to_end(tmp_path):
+def test_load_dataset_rejects_paths_outside_data_dir(tmp_path, monkeypatch):
+    monkeypatch.setenv("SCRNA_COPILOT_DATA_DIR", str(tmp_path / "data"))
+    outside = tmp_path / "outside.h5ad"
+    synthetic_adata().write_h5ad(outside)
+    with pytest.raises(ValueError, match="Only .h5ad files"):
+        srv.load_dataset(str(outside))
+    with pytest.raises(ValueError, match="Only .h5ad files"):
+        srv.load_dataset("/etc/passwd")
+
+
+def test_load_dataset_rejects_non_h5ad_inside_data_dir(tmp_path, monkeypatch):
+    monkeypatch.setenv("SCRNA_COPILOT_DATA_DIR", str(tmp_path))
+    (tmp_path / "notes.txt").write_text("x")
+    with pytest.raises(ValueError, match="Only .h5ad files"):
+        srv.load_dataset(str(tmp_path / "notes.txt"))
+
+
+def test_tool_chain_end_to_end(tmp_path, monkeypatch):
+    monkeypatch.setenv("SCRNA_COPILOT_DATA_DIR", str(tmp_path))
     path = tmp_path / "synthetic.h5ad"
     synthetic_adata().write_h5ad(path)
     assert srv.load_dataset(str(path))["n_cells"] == 300

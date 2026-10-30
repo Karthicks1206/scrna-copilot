@@ -6,11 +6,12 @@ agent can run QC, inspect the result, adjust parameters, then cluster.
 from __future__ import annotations
 
 from dataclasses import asdict
+from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
 from scrna_copilot.pipeline import (
-    PipelineConfig, annotate, cluster, find_markers, load_h5ad, load_pbmc3k,
+    PipelineConfig, _data_dir, annotate, cluster, find_markers, load_h5ad, load_pbmc3k,
     normalize_and_reduce, run_qc,
 )
 
@@ -24,10 +25,19 @@ def _require(stage: str) -> None:
         raise ValueError(f"Run the earlier steps first (current stage: {_state['stage']}, needs: {stage}).")
 
 
+def _resolve_source(source: str) -> Path:
+    """Only .h5ad files inside the data directory may be loaded, so an agent can't read arbitrary paths."""
+    allowed = _data_dir().resolve()
+    path = Path(source).expanduser().resolve()
+    if path.suffix != ".h5ad" or not path.is_relative_to(allowed):
+        raise ValueError(f"Only .h5ad files inside {allowed} can be loaded (got: {source}).")
+    return path
+
+
 @mcp.tool()
 def load_dataset(source: str = "pbmc3k") -> dict:
-    """Load a dataset. Use 'pbmc3k' for the public 10x PBMC 3k data, or a path to an .h5ad file."""
-    adata = load_pbmc3k() if source == "pbmc3k" else load_h5ad(source)
+    """Load a dataset. Use 'pbmc3k' for the public 10x PBMC 3k data, or the path of an .h5ad file inside the data directory."""
+    adata = load_pbmc3k() if source == "pbmc3k" else load_h5ad(_resolve_source(source))
     _state.update(adata=adata, stage="loaded")
     return {"n_cells": adata.n_obs, "n_genes": adata.n_vars}
 
