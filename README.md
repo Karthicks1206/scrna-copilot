@@ -58,7 +58,7 @@ The first defaults (resolution 0.8, Leiden stopped after 2 iterations) separated
 
 | Tool | What it does |
 |---|---|
-| `load_dataset` | PBMC 3k (downloaded by scanpy on first use) or a path to an `.h5ad` file |
+| `load_dataset` | PBMC 3k (downloaded by scanpy on first use) or an `.h5ad` file inside the data directory (other paths are rejected) |
 | `quality_control` | Filters cells by minimum genes, a maximum-genes ceiling (a crude doublet proxy) and mitochondrial %; drops rare genes |
 | `normalize_and_pca` | Library-size normalization, log1p, 2000 highly variable genes, scaling, PCA |
 | `cluster_cells` | kNN graph, Leiden clustering, UMAP |
@@ -108,12 +108,12 @@ If the server fails to start with `No module named 'scrna_copilot'`: on one macO
 
 ## Tests
 
-10 tests, none of which need a download:
+12 tests, none of which need a download:
 
 - the pipeline on synthetic count data with known groups (QC, full run, recovery of groups, reproducibility, stability across seeds);
 - a save and reload round trip that checks provenance survives the `.h5ad` file;
 - annotation against ground truth, and the "Unassigned" fallback;
-- the MCP layer: expected tool list, out-of-order calls rejected, and a full tool chain on synthetic data.
+- the MCP layer: expected tool list, out-of-order calls rejected, paths outside the data directory and non-`.h5ad` files rejected, and a full tool chain on synthetic data.
 
 `mcp` is pinned to `<2` because mcp 2.x renamed `FastMCP` and changed other APIs; migrating is future work.
 
@@ -124,7 +124,7 @@ If the server fails to start with `No module named 'scrna_copilot'`: on one macO
 - **T cell subtypes are not resolved.** Clusters 0 and 2 both get "CD4+ T cells", and the two clusters did not separate into naive and memory T cells in a convincing way. `CD4` itself is detected in few cells (a known limit of 3' droplet data), so the label rests on `CD3D`/`CD3E`/`IL7R` plus the absence of cytotoxic genes.
 - **Small groups.** Platelets (15 cells) and dendritic cells (37) are too small for confident statistics. The dendritic cluster has the highest median genes per cell of any cluster and might include some doublets. No dedicated doublet detector (such as Scrublet) was run.
 - **Seeds and environment.** Only 5 full-pipeline seeds were tested, on one machine, with one set of library versions.
-- **Server state.** The MCP server keeps one dataset in process memory with no per-user isolation, so it is a demo design and not a multi-user service.
+- **Server state.** The MCP server keeps one dataset in process memory with no per-user isolation, so it is a demo design and not a multi-user service. `load_dataset` only reads `.h5ad` files inside the data directory, but there is no authentication.
 
 ## Tech
 
